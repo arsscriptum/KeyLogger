@@ -77,17 +77,25 @@ goto :init
     call %__lib_out% :__out_d_red "Fasm Done"
     goto :eof
 
-
+:run_test
+    call %__lib_out% :__out_n_d_yel "[i] "
+    call %__lib_out% :__out_d_red "Launching baretail..."
+    baretail.exe C:\Tmp\log_file.txt
+    xps kl
+    goto :eof
 
 :: ==============================================================================
 ::   Build
 :: ==============================================================================
 :build
-    
+    call %__lib_out% :__out_n_l_red "[x] "
+    pkill kl
+    call %__lib_out% :__out_d_cya "killed dangling kl.exe processes"
     call %__lib_out% :__out_n_l_grn "[x] "
     rmdir /s /q bin
     call %__lib_out% :__out_d_cya "deleted %cd%\bin"
     call :build_asm
+    ::call :run_test
     goto :finished
 
 

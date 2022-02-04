@@ -2,15 +2,37 @@
 ;           IAT
 ;   =========================================================
 library kernel32, 'kernel32.dll',\
-        user32, 'user32.dll'
+        user32, 'user32.dll',\
+        msvcrt, 'msvcrt.dll'
+
 
 import  kernel32,\
+         AllocConsole,'AllocConsole',\
+         FreeConsole,'FreeConsole',\
+         GetStdHandle,'GetStdHandle',\
+         WriteConsole,'WriteConsoleA',\
+         ReadConsole,'ReadConsoleA',\
+         ReadConsoleInput,'ReadConsoleInputA',\
+         FlushConsoleInputBuffer,'FlushConsoleInputBuffer',\
+         SetConsoleMode,'SetConsoleMode',\
+         SetConsoleTitle,'SetConsoleTitleA',\
+         SetConsoleTextAttribute,'SetConsoleTextAttribute',\
+         SetConsoleCursorPosition,'SetConsoleCursorPosition',\
+         FillConsoleOutputCharacter,'FillConsoleOutputCharacterA',\
+         GetConsoleScreenBufferInfo,'GetConsoleScreenBufferInfo',\
+         FillConsoleOutputAttribute,'FillConsoleOutputAttribute',\
+         GetEnvironmentVariable,'GetEnvironmentVariableA',\
+         SetEnvironmentVariable,'SetEnvironmentVariableA',\
+         SleepX,'Sleep',\
+         StrCat,'lstrcat',\
+         ExitProcess,'ExitProcess',\
         OutputDebugStringA, 'OutputDebugStringA',\
         OutputDebugStringW, 'OutputDebugStringW',\
         VirtualFree, 'VirtualFree',\
         VirtualAlloc, 'VirtualAlloc',\
         LoadLibraryA, 'LoadLibraryA',\
-        CreateMutex, 'CreateMutexA',\
+        GetLastError, 'GetLastError',\
+        CreateMutexA, 'CreateMutexA',\
         GetModuleHandleA, 'GetModuleHandleA',\
         CreateThread, 'CreateThread',\
         WaitForSingleObject, 'WaitForSingleObject',\
@@ -20,6 +42,7 @@ import  kernel32,\
         lstrlenW, 'lstrlenW',\
         lstrcmpW, 'lstrcmpW',\
         GetLocalTime, 'GetLocalTime',\
+        GetComputerNameA, 'GetComputerNameA',\
         lstrcpyW, 'lstrcpyW'
              
 import  user32,\
@@ -38,4 +61,13 @@ import  user32,\
         wsprintfA, 'wsprintfA',\
         GetKeyNameTextW, 'GetKeyNameTextW',\
         GetWindowTextW, 'GetWindowTextW',\
+         GetActiveWindow,'GetActiveWindow',\
+         MessageBox,'MessageBoxA',\
+         SetFocus,'SetFocus',\         
         wsprintfW, 'wsprintfW'
+
+import msvcrt,\
+        wprintf, 'wprintf',\
+        printf, 'printf',\
+        getchar,'getchar',\
+        scanf,'scanf'
