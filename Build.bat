@@ -15,7 +15,7 @@ goto :init
 
 :init
     set "__scripts_root=%AutomationScriptsRoot%"
-    call :read_script_root development\build-automation  BuildAutomation
+    call :read_script_data development\build-automation  BuildAutomation
     set "__script_file=%~0"
     set "__target=%~1"
     set "__script_path=%~dp0"
@@ -30,21 +30,23 @@ goto :init
 
 :header
     echo. %__script_name% v%__script_version%
-    echo.    This script is part of codecastor build wrappers.
+    echo.    This script is part of Ars Scriptum build wrappers.
     echo.
     goto :eof
 
 :error_missing_script
-    echo.**************************************************
+    echo. ======================================================
     echo.This script is part of arsscriptum build wrappers.
-    echo.**************************************************
+    echo. ======================================================
     echo.
-    echo. YOU NEED TO HAVE THE BuildAutomation Scripts setup on you system...
+    echo. YOU NEED TO HAVE THE BuildAutomation Scripts setup
+    echo. on you system...
     echo. https://github.com/arsscriptum/BuildAutomation
     goto :eof
 
 
-:read_script_root
+:read_script_data
+    if not defined OrganizationHKCU::=          call :header_err && call :error_missing_path OrganizationHKCU::= & goto :eof
     set regpath=%OrganizationHKCU::=%
     for /f "tokens=2,*" %%A in ('REG.exe query %regpath%\%1 /v %2') do (
             set "__scripts_root=%%B"
@@ -107,3 +109,4 @@ goto :init
     call %__lib_out% :__out_n_l_grn "Done"
     
     goto :eof
+
