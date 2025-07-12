@@ -74,7 +74,7 @@ goto :init
     call %__lib_out% :__out_l_cya "Using Flat Assembler C:\Programs\FlatAssembler\FASM.EXE"
     call %__lib_out% :__out_n_d_yel "[i] "
     call %__lib_out% :__out_l_cya "Building src/kl.asm to bin/kl.exe"
-    "C:\Programs\FlatAssembler\FASM.EXE" %cd%\src\kl.asm %cd%\bin\kl.exe
+    "C:\FASM\FASM.EXE" %cd%\src\kl.asm %cd%\bin\kl.exe
     call %__lib_out% :__out_n_d_yel "[i] "
     call %__lib_out% :__out_d_red "Fasm Done"
     goto :eof
